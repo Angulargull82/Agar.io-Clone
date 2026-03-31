@@ -32,6 +32,7 @@
       line-height: 1.4;
       backdrop-filter: blur(6px);
       min-width: 190px;
+      z-index: 5;
     }
     .meter {
       width: 100%;
@@ -64,10 +65,187 @@
       border-radius: 10px;
       font-size: 13px;
       backdrop-filter: blur(6px);
+      z-index: 5;
+    }
+    .menu {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(7, 10, 20, 0.72);
+      backdrop-filter: blur(8px);
+      z-index: 20;
+    }
+    .menuCard {
+      width: min(520px, calc(100vw - 32px));
+      background: rgba(18, 24, 44, 0.94);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 20px;
+      padding: 22px;
+      color: white;
+      box-shadow: 0 24px 70px rgba(0,0,0,0.45);
+    }
+    .menuCard h1 {
+      margin: 0 0 8px 0;
+      font-size: 28px;
+    }
+    .menuCard p {
+      margin: 0 0 18px 0;
+      color: rgba(255,255,255,0.78);
+      line-height: 1.5;
+    }
+    .menuRow {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .menuRow label {
+      font-size: 13px;
+      color: rgba(255,255,255,0.82);
+    }
+    .menuRow select, .menuRow input {
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.08);
+      color: white;
+      padding: 12px 14px;
+      font-size: 15px;
+      outline: none;
+    }
+    .skinHint {
+      margin-top: 6px;
+      font-size: 12px;
+      color: rgba(255,255,255,0.68);
+    }
+    .skinGrid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+      margin-top: 8px;
+      max-height: 160px;
+      overflow: auto;
+      padding-right: 2px;
+    }
+    .skinChip {
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 12px;
+      background: rgba(255,255,255,0.06);
+      color: white;
+      padding: 10px 8px;
+      font-size: 12px;
+      cursor: pointer;
+      text-align: center;
+      line-height: 1.2;
+    }
+    .skinChip.active {
+      background: rgba(103,232,249,0.22);
+      border-color: rgba(103,232,249,0.7);
+    }
+    .menuButtons {
+      display: flex;
+      gap: 10px;
+      margin-top: 18px;
+    }
+    .menuButtons button {
+      flex: 1;
+      border: 0;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    #startBtn {
+      background: linear-gradient(135deg, #67e8f9, #22c55e);
+      color: #071019;
+    }
+    #randomBtn {
+      background: rgba(255,255,255,0.08);
+      color: white;
+    }
+    .hidden { display: none !important; }
+    .deathOverlay {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.35);
+      backdrop-filter: blur(4px);
+      z-index: 15;
+      pointer-events: none;
+      color: white;
+      text-align: center;
+    }
+    .deathCard {
+      background: rgba(18, 24, 44, 0.92);
+      border: 1px solid rgba(255,255,255,0.12);
+      padding: 18px 22px;
+      border-radius: 18px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+      min-width: 240px;
+    }
+    .deathTitle {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .deathText {
+      font-size: 16px;
+      color: rgba(255,255,255,0.82);
     }
   </style>
 </head>
 <body>
+  <div class="menu" id="menu">
+    <div class="menuCard">
+      <h1>Agar.io Clone</h1>
+      <p>Choose your skin, then play. Bots wander, flee, chase, sprint, and sometimes split like real players.</p>
+      <div class="menuRow">
+        <label for="playerName">Name</label>
+        <input id="playerName" maxlength="18" value="You" />
+      </div>
+      <div class="menuRow">
+        <label for="skinSelect">Skin</label>
+        <select id="skinSelect">
+          <option value="classic">Classic</option>
+          <option value="stripes">Stripes</option>
+          <option value="checker">Checker</option>
+          <option value="galaxy">Galaxy</option>
+          <option value="smiley">Smiley</option>
+          <option value="spikes">Spikes</option>
+          <option value="neon">Neon</option>
+          <option value="camo">Camo</option>
+        </select>
+        <div class="skinHint">Skins shown below too:</div>
+        <div class="skinGrid" id="skinGrid">
+          <button class="skinChip active" data-skin="classic" type="button">Classic</button>
+          <button class="skinChip" data-skin="stripes" type="button">Stripes</button>
+          <button class="skinChip" data-skin="checker" type="button">Checker</button>
+          <button class="skinChip" data-skin="galaxy" type="button">Galaxy</button>
+          <button class="skinChip" data-skin="smiley" type="button">Smiley</button>
+          <button class="skinChip" data-skin="spikes" type="button">Spikes</button>
+          <button class="skinChip" data-skin="neon" type="button">Neon</button>
+          <button class="skinChip" data-skin="camo" type="button">Camo</button>
+        </div>
+      </div>
+      <div class="menuButtons">
+        <button id="randomBtn" type="button">Random skin</button>
+        <button id="startBtn" type="button">Start game</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="deathOverlay" class="hidden deathOverlay">
+    <div class="deathCard">
+      <div class="deathTitle">You died</div>
+      <div id="deathTimerText" class="deathText">Respawning...</div>
+    </div>
+  </div>
+
   <canvas id="game"></canvas>
   <div class="hud" id="hud">
     <div id="hudText">Loading...</div>
@@ -82,12 +260,26 @@
     const hudText = document.getElementById('hudText');
     const sprintFill = document.getElementById('sprintFill');
     const sprintLabel = document.getElementById('sprintLabel');
+    const menu = document.getElementById('menu');
+    const deathOverlay = document.getElementById('deathOverlay');
+    const deathTimerText = document.getElementById('deathTimerText');
+    const startBtn = document.getElementById('startBtn');
+    const randomBtn = document.getElementById('randomBtn');
+    const skinSelect = document.getElementById('skinSelect');
+    const skinGrid = document.getElementById('skinGrid');
+    const playerNameInput = document.getElementById('playerName');
 
     const WORLD = { w: 5000, h: 5000 };
-    const FOOD_COUNT = 450;
-    const BOT_COUNT = 12;
+    const FOOD_COUNT = 850;
+    const BOT_COUNT = 70;
     const MAX_PLAYER_PARTS = 16;
-    const colors = ['#ff6b6b','#ffd93d','#6bcB77','#4d96ff','#b983ff','#ff8fab','#f7b267','#7bdff2'];
+    const SKINS = ['classic', 'stripes', 'checker', 'galaxy', 'smiley', 'spikes', 'neon', 'camo'];
+    const colors = ['#ff6b6b', '#ffd93d', '#6bcB77', '#4d96ff', '#b983ff', '#ff8fab', '#f7b267', '#7bdff2'];
+    const botNames = [
+      'Alex', 'Mira', 'Noah', 'Lina', 'Olle', 'Saga', 'Elias', 'Nora', 'Vera', 'Leo',
+      'Elsa', 'Max', 'Milo', 'Alma', 'Felix', 'Nova', 'William', 'Ida', 'Ella', 'Arvid',
+      'Selma', 'Hugo', 'Alice', 'Nils', 'Tova', 'Sam', 'Iris', 'Adam', 'Liam', 'Olivia'
+    ];
 
     let W = 0, H = 0, DPR = 1;
     let mouse = { x: 0, y: 0 };
@@ -97,6 +289,16 @@
     let lastTime = performance.now();
     let sprintEnergy = 100;
     const MAX_SPRINT = 100;
+    let gameStarted = false;
+    let playerSkin = 'classic';
+    let playerDisplayName = 'You';
+    let playerRespawnTimer = 0;
+    let playerInvincibleTimer = 0;
+
+    const foods = [];
+    const cells = [];
+    const botBrains = new Map();
+    let nextBotId = 1;
 
     function resize() {
       DPR = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
@@ -111,25 +313,6 @@
     window.addEventListener('resize', resize);
     resize();
 
-    window.addEventListener('mousemove', (e) => {
-      mouse.x = e.clientX;
-      mouse.y = e.clientY;
-    });
-
-    window.addEventListener('keydown', (e) => {
-      if (e.code === 'Space') {
-        e.preventDefault();
-        splitQueued = true;
-      }
-      if (e.code === 'KeyW') {
-        keys.w = true;
-      }
-    });
-
-    window.addEventListener('keyup', (e) => {
-      if (e.code === 'KeyW') keys.w = false;
-    });
-
     function rand(min, max) {
       return Math.random() * (max - min) + min;
     }
@@ -143,8 +326,119 @@
       return Math.sqrt(m) * 4;
     }
 
-    const foods = [];
-    const cells = [];
+    function pickName() {
+      return botNames[(Math.random() * botNames.length) | 0] + ' ' + ((Math.random() * 90) | 0);
+    }
+
+    function randomBotMass() {
+      const r = Math.random();
+      if (r < 0.15) return rand(24, 55);
+      if (r < 0.70) return rand(55, 130);
+      return rand(130, 250);
+    }
+
+    function randomBotType() {
+      const r = Math.random();
+      if (r < 0.34) return 'aggressive';
+      if (r < 0.68) return 'defensive';
+      return 'neutral';
+    }
+
+    function randomSkin() {
+      return SKINS[(Math.random() * SKINS.length) | 0];
+    }
+
+    function createBrain(ownerId, name, skin) {
+      return {
+        ownerId,
+        name,
+        skin,
+        personality: randomBotType(),
+        decisionTimer: rand(0.2, 1.0),
+        goalType: 'wander',
+        goalX: rand(0, WORLD.w),
+        goalY: rand(0, WORLD.h),
+        sprintEnergy: rand(30, 100),
+        sprinting: false,
+        sprintTimer: 0,
+        splitCooldown: rand(1.5, 5)
+      };
+    }
+
+    function createCell({ ownerId, name, isPlayer = false, mass = 120, skin = 'classic', x, y, vx = 0, vy = 0 }) {
+      return {
+        ownerId,
+        name,
+        isPlayer,
+        x: x ?? rand(100, WORLD.w - 100),
+        y: y ?? rand(100, WORLD.h - 100),
+        vx,
+        vy,
+        mass,
+        r: massToRadius(mass),
+        color: colors[(Math.random() * colors.length) | 0],
+        skin,
+        alive: true,
+        splitCooldown: 0,
+        mergeTimer: 0,
+        wobble: rand(0, Math.PI * 2)
+      };
+    }
+
+    function playerCells() {
+      return cells.filter(c => c.alive && c.ownerId === 'player');
+    }
+
+    function totalPlayerMass() {
+      return playerCells().reduce((sum, c) => sum + c.mass, 0);
+    }
+
+    function setSkin(skin) {
+      if (!SKINS.includes(skin)) skin = 'classic';
+      skinSelect.value = skin;
+      document.querySelectorAll('.skinChip').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.skin === skin);
+      });
+      playerSkin = skin;
+    }
+
+    skinGrid.addEventListener('click', (e) => {
+      const btn = e.target.closest('.skinChip');
+      if (!btn) return;
+      setSkin(btn.dataset.skin);
+    });
+
+    skinSelect.addEventListener('change', () => setSkin(skinSelect.value));
+
+    randomBtn.addEventListener('click', () => {
+      setSkin(SKINS[(Math.random() * SKINS.length) | 0]);
+    });
+
+    startBtn.addEventListener('click', () => {
+      playerSkin = skinSelect.value;
+      playerDisplayName = (playerNameInput.value || 'You').trim().slice(0, 18) || 'You';
+      menu.classList.add('hidden');
+      gameStarted = true;
+      resetGame();
+      requestAnimationFrame(loop);
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        splitQueued = true;
+      }
+      if (e.code === 'KeyW') keys.w = true;
+    });
+
+    window.addEventListener('keyup', (e) => {
+      if (e.code === 'KeyW') keys.w = false;
+    });
 
     function spawnFood() {
       return {
@@ -155,46 +449,56 @@
       };
     }
 
-    function spawnCell(name, isPlayer = false) {
-      const mass = isPlayer ? 120 : rand(40, 120);
-      return {
-        name,
-        isPlayer,
-        x: rand(100, WORLD.w - 100),
-        y: rand(100, WORLD.h - 100),
-        vx: 0,
-        vy: 0,
-        mass,
-        r: massToRadius(mass),
-        color: colors[(Math.random() * colors.length) | 0],
-        alive: true,
-        target: { x: rand(0, WORLD.w), y: rand(0, WORLD.h) },
-        splitCooldown: 0,
-        mergeTimer: 0
-      };
-    }
-
-    function playerCells() {
-      return cells.filter(c => c.alive && c.isPlayer);
-    }
-
-    function totalPlayerMass() {
-      return playerCells().reduce((sum, c) => sum + c.mass, 0);
-    }
-
-    function spawnPlayerAtCenter() {
-      const p = spawnCell('You', true);
-      p.x = WORLD.w / 2;
-      p.y = WORLD.h / 2;
-      p.mass = 120;
-      p.r = massToRadius(p.mass);
+    function spawnPlayerAt(x, y) {
+      const p = createCell({
+        ownerId: 'player',
+        name: playerDisplayName,
+        isPlayer: true,
+        mass: 120,
+        skin: playerSkin,
+        x,
+        y
+      });
       cells.push(p);
+      playerInvincibleTimer = 2.0;
       return p;
     }
 
-    spawnPlayerAtCenter();
-    for (let i = 0; i < BOT_COUNT; i++) cells.push(spawnCell('Bot ' + (i + 1)));
-    for (let i = 0; i < FOOD_COUNT; i++) foods.push(spawnFood());
+    function spawnPlayerAtCenter() {
+      return spawnPlayerAt(WORLD.w / 2, WORLD.h / 2);
+    }
+
+    function spawnBot(ownerId = null) {
+      const id = ownerId || `bot_${nextBotId++}`;
+      const name = pickName();
+      const skin = randomSkin();
+      const brain = createBrain(id, name, skin);
+      botBrains.set(id, brain);
+      const cell = createCell({
+        ownerId: id,
+        name,
+        isPlayer: false,
+        mass: randomBotMass(),
+        skin,
+        x: rand(100, WORLD.w - 100),
+        y: rand(100, WORLD.h - 100)
+      });
+      cells.push(cell);
+      return cell;
+    }
+
+    function resetGame() {
+      cells.length = 0;
+      foods.length = 0;
+      botBrains.clear();
+      nextBotId = 1;
+      sprintEnergy = 100;
+      playerRespawnTimer = 0;
+      playerInvincibleTimer = 2.0;
+      spawnPlayerAtCenter();
+      for (let i = 0; i < BOT_COUNT; i++) spawnBot();
+      for (let i = 0; i < FOOD_COUNT; i++) foods.push(spawnFood());
+    }
 
     function splitCell(cell, dirX, dirY) {
       if (cell.mass < 80 || cell.splitCooldown > 0) return false;
@@ -205,21 +509,19 @@
       const nx = dirX / len;
       const ny = dirY / len;
 
-      const child = {
-        name: cell.isPlayer ? 'You' : cell.name,
+      const child = createCell({
+        ownerId: cell.ownerId,
+        name: cell.name,
         isPlayer: cell.isPlayer,
+        mass: newMass,
+        skin: cell.skin,
         x: clamp(cell.x + nx * cell.r * 1.15, 0, WORLD.w),
         y: clamp(cell.y + ny * cell.r * 1.15, 0, WORLD.h),
         vx: cell.vx + nx * 900,
-        vy: cell.vy + ny * 900,
-        mass: newMass,
-        r: massToRadius(newMass),
-        color: cell.color,
-        alive: true,
-        target: { x: rand(0, WORLD.w), y: rand(0, WORLD.h) },
-        splitCooldown: 1.0,
-        mergeTimer: 1.8
-      };
+        vy: cell.vy + ny * 900
+      });
+      child.splitCooldown = 1.0;
+      child.mergeTimer = 1.8;
 
       cell.vx -= nx * 90;
       cell.vy -= ny * 90;
@@ -229,7 +531,20 @@
       return true;
     }
 
+    function getCellCenter(list) {
+      if (!list.length) return { x: 0, y: 0 };
+      let x = 0, y = 0;
+      for (const c of list) {
+        x += c.x;
+        y += c.y;
+      }
+      return { x: x / list.length, y: y / list.length };
+    }
+
     function updatePlayer(dt) {
+      const parts = playerCells();
+      if (!parts.length) return;
+
       const dx = mouse.x - W / 2;
       const dy = mouse.y - H / 2;
       const len = Math.hypot(dx, dy) || 1;
@@ -237,13 +552,9 @@
       const ny = dy / len;
 
       const sprinting = keys.w && sprintEnergy > 0.5;
-      if (sprinting) {
-        sprintEnergy = clamp(sprintEnergy - 34 * dt, 0, MAX_SPRINT);
-      } else {
-        sprintEnergy = clamp(sprintEnergy + 18 * dt, 0, MAX_SPRINT);
-      }
+      if (sprinting) sprintEnergy = clamp(sprintEnergy - 34 * dt, 0, MAX_SPRINT);
+      else sprintEnergy = clamp(sprintEnergy + 18 * dt, 0, MAX_SPRINT);
 
-      const parts = playerCells();
       for (const c of parts) {
         const moveSpeed = Math.max(65, 215 - c.r * 1.15);
         const accel = sprinting ? 520 : 260;
@@ -265,20 +576,177 @@
       }
     }
 
-    function updateBots(dt) {
-      for (const c of cells) {
-        if (c.isPlayer || !c.alive) continue;
-        if (Math.random() < 0.01) {
-          c.target.x = rand(0, WORLD.w);
-          c.target.y = rand(0, WORLD.h);
+    function findClosestFood(x, y, maxDist) {
+      let best = null;
+      let bestD = maxDist;
+      for (const f of foods) {
+        const d = dist(x, y, f.x, f.y);
+        if (d < bestD) {
+          bestD = d;
+          best = f;
         }
-        let dx = c.target.x - c.x;
-        let dy = c.target.y - c.y;
-        let len = Math.hypot(dx, dy) || 1;
-        dx /= len; dy /= len;
-        const speed = Math.max(55, 180 - c.r * 1.1);
-        c.vx += dx * speed * dt * 0.6;
-        c.vy += dy * speed * dt * 0.6;
+      }
+      return best;
+    }
+
+    function findClosestThreat(x, y, cell, maxDist) {
+      let best = null;
+      let bestD = maxDist;
+      for (const other of cells) {
+        if (!other.alive || other === cell) continue;
+        if (other.ownerId === cell.ownerId) continue;
+        if (other.mass <= cell.mass * 1.15) continue;
+        const d = dist(x, y, other.x, other.y);
+        if (d < bestD) {
+          bestD = d;
+          best = other;
+        }
+      }
+      return best;
+    }
+
+    function findClosestPrey(x, y, cell, maxDist) {
+      let best = null;
+      let bestD = maxDist;
+      for (const other of cells) {
+        if (!other.alive || other === cell) continue;
+        if (other.ownerId === cell.ownerId) continue;
+        if (other.mass >= cell.mass * 0.88) continue;
+        const d = dist(x, y, other.x, other.y);
+        if (d < bestD) {
+          bestD = d;
+          best = other;
+        }
+      }
+      return best;
+    }
+
+    function updateBotBrains(dt) {
+      for (const brain of botBrains.values()) {
+        const aliveParts = cells.filter(c => c.alive && c.ownerId === brain.ownerId);
+        if (!aliveParts.length) continue;
+
+        const lead = aliveParts.slice().sort((a, b) => b.mass - a.mass)[0];
+        const center = getCellCenter(aliveParts);
+        const threat = findClosestThreat(center.x, center.y, lead, 980);
+        const prey = findClosestPrey(center.x, center.y, lead, 980);
+        const food = findClosestFood(center.x, center.y, 1200);
+
+        brain.decisionTimer -= dt;
+        brain.splitCooldown = Math.max(0, brain.splitCooldown - dt);
+        brain.sprintTimer = Math.max(0, brain.sprintTimer - dt);
+
+        const regrouping = aliveParts.length > 1;
+        const needFood = lead.mass < 140 || Math.random() < 0.15;
+
+        if (brain.decisionTimer <= 0) {
+          brain.decisionTimer = rand(0.35, 1.15);
+          if (regrouping && rand(0, 1) < 0.35) {
+            brain.goalType = 'regroup';
+            brain.goalX = center.x + rand(-40, 40);
+            brain.goalY = center.y + rand(-40, 40);
+          } else if (threat && (brain.personality === 'defensive' || lead.mass < threat.mass * 1.25)) {
+            brain.goalType = 'flee';
+            const awayX = center.x - (threat.x - center.x) * 1.7;
+            const awayY = center.y - (threat.y - center.y) * 1.7;
+            brain.goalX = clamp(awayX + rand(-180, 180), 0, WORLD.w);
+            brain.goalY = clamp(awayY + rand(-180, 180), 0, WORLD.h);
+          } else if (prey && (brain.personality === 'aggressive' || rand(0, 1) < 0.45) && lead.mass > prey.mass * 1.2) {
+            brain.goalType = 'chase';
+            brain.goalX = prey.x + rand(-60, 60);
+            brain.goalY = prey.y + rand(-60, 60);
+          } else if (food && needFood) {
+            brain.goalType = 'food';
+            brain.goalX = food.x;
+            brain.goalY = food.y;
+          } else {
+            brain.goalType = 'wander';
+            brain.goalX = clamp(center.x + rand(-650, 650), 0, WORLD.w);
+            brain.goalY = clamp(center.y + rand(-650, 650), 0, WORLD.h);
+          }
+        }
+
+        const threatDist = threat ? dist(center.x, center.y, threat.x, threat.y) : 99999;
+        const preyDist = prey ? dist(center.x, center.y, prey.x, prey.y) : 99999;
+
+        const wantsSprint = (brain.goalType === 'chase' && preyDist < 650) || (brain.goalType === 'flee' && threatDist < 700);
+        if (wantsSprint && brain.sprintEnergy > 4) {
+          brain.sprinting = true;
+          brain.sprintTimer = Math.max(brain.sprintTimer, rand(0.45, 1.1));
+        }
+
+        if (brain.sprinting) {
+          brain.sprintEnergy = clamp(brain.sprintEnergy - 22 * dt, 0, MAX_SPRINT);
+          if (brain.sprintEnergy <= 2 || brain.sprintTimer <= 0) brain.sprinting = false;
+        } else {
+          brain.sprintEnergy = clamp(brain.sprintEnergy + 12 * dt, 0, MAX_SPRINT);
+        }
+
+        if (brain.goalType === 'chase' && prey && lead.mass > prey.mass * 1.7 && brain.splitCooldown <= 0 && aliveParts.length < 4 && rand(0, 1) < 0.015) {
+          splitCell(lead, prey.x - lead.x, prey.y - lead.y);
+          brain.splitCooldown = 4.5;
+        }
+
+        brain.think = { center, threat, prey, food, threatDist, preyDist };
+      }
+    }
+
+    function updateBots(dt) {
+      for (const brain of botBrains.values()) {
+        const aliveParts = cells.filter(c => c.alive && c.ownerId === brain.ownerId);
+        if (!aliveParts.length) continue;
+
+        const center = brain.think?.center || getCellCenter(aliveParts);
+        const targetX = brain.goalX;
+        const targetY = brain.goalY;
+        const moveBase = brain.sprinting ? 1.35 : 1.0;
+
+        aliveParts.sort((a, b) => b.mass - a.mass);
+        for (let i = 0; i < aliveParts.length; i++) {
+          const c = aliveParts[i];
+          const offsetAngle = (i / Math.max(1, aliveParts.length)) * Math.PI * 2;
+          const offsetRadius = Math.min(120, 26 + i * 12);
+          const formationX = center.x + Math.cos(offsetAngle) * offsetRadius * 0.5;
+          const formationY = center.y + Math.sin(offsetAngle) * offsetRadius * 0.5;
+
+          let dx = targetX - c.x;
+          let dy = targetY - c.y;
+          if (aliveParts.length > 1) {
+            dx += (formationX - c.x) * 0.65;
+            dy += (formationY - c.y) * 0.65;
+          }
+
+          if (brain.goalType === 'flee' && brain.think?.threat) {
+            const th = brain.think.threat;
+            const d = dist(c.x, c.y, th.x, th.y) || 1;
+            dx -= (th.x - c.x) / d * 1.1;
+            dy -= (th.y - c.y) / d * 1.1;
+          }
+
+          if (brain.goalType === 'chase' && brain.think?.prey) {
+            const pr = brain.think.prey;
+            const d = dist(c.x, c.y, pr.x, pr.y) || 1;
+            dx += (pr.x - c.x) / d * 0.8;
+            dy += (pr.y - c.y) / d * 0.8;
+          }
+
+          const len = Math.hypot(dx, dy) || 1;
+          dx /= len;
+          dy /= len;
+
+          const moveSpeed = Math.max(42, 185 - c.r * 1.0) * moveBase;
+          const accel = brain.sprinting ? 360 : 240;
+          c.vx += dx * accel * dt;
+          c.vy += dy * accel * dt;
+          c.vx = clamp(c.vx, -moveSpeed, moveSpeed);
+          c.vy = clamp(c.vy, -moveSpeed, moveSpeed);
+
+          if (brain.goalType === 'wander') {
+            c.wobble += dt * 1.7;
+            c.vx += Math.cos(c.wobble) * 6 * dt;
+            c.vy += Math.sin(c.wobble) * 6 * dt;
+          }
+        }
       }
     }
 
@@ -289,12 +757,10 @@
         c.y += c.vy * dt;
         c.vx *= Math.pow(0.18, dt);
         c.vy *= Math.pow(0.18, dt);
-
         c.x = clamp(c.x, c.r, WORLD.w - c.r);
         c.y = clamp(c.y, c.r, WORLD.h - c.r);
         c.mass = Math.max(20, c.mass);
         c.r = massToRadius(c.mass);
-
         c.splitCooldown = Math.max(0, c.splitCooldown - dt);
         c.mergeTimer = Math.max(0, c.mergeTimer - dt);
       }
@@ -318,7 +784,9 @@
       for (const a of aliveCells) {
         for (const b of aliveCells) {
           if (a === b || !a.alive || !b.alive) continue;
-          if (a.isPlayer && b.isPlayer) continue;
+          if (a.ownerId === b.ownerId) continue;
+          if (a.ownerId === 'player' && playerInvincibleTimer > 0) continue;
+          if (b.ownerId === 'player' && playerInvincibleTimer > 0) continue;
           if (a.mass <= b.mass * 1.12) continue;
           const d = dist(a.x, a.y, b.x, b.y);
           if (d < a.r - b.r * 0.2) {
@@ -327,37 +795,101 @@
           }
         }
       }
+    }
 
-      for (let i = 0; i < cells.length; i++) {
-        if (cells[i].alive) continue;
-        if (!cells[i].isPlayer) cells[i] = spawnCell('Bot');
-      }
+    function mergeSameOwnerCells() {
+      const ownerIds = [...new Set(cells.filter(c => c.alive).map(c => c.ownerId))];
+      for (const ownerId of ownerIds) {
+        const parts = cells.filter(c => c.alive && c.ownerId === ownerId);
+        if (parts.length < 2) continue;
 
-      if (playerCells().length === 0) {
-        spawnPlayerAtCenter();
+        const center = getCellCenter(parts);
+        for (const c of parts) {
+          if (c.mergeTimer <= 0) {
+            const dx = center.x - c.x;
+            const dy = center.y - c.y;
+            const d = Math.hypot(dx, dy) || 1;
+            c.vx += (dx / d) * 8 * 0.016;
+            c.vy += (dy / d) * 8 * 0.016;
+          }
+        }
+
+        for (let i = 0; i < parts.length; i++) {
+          for (let j = i + 1; j < parts.length; j++) {
+            const a = parts[i];
+            const b = parts[j];
+            if (!a.alive || !b.alive) continue;
+            if (a.mergeTimer > 0 || b.mergeTimer > 0) continue;
+            const d = dist(a.x, a.y, b.x, b.y);
+            if (d < (a.r + b.r) * 0.88) {
+              const keep = a.mass >= b.mass ? a : b;
+              const remove = keep === a ? b : a;
+              const total = keep.mass + remove.mass;
+              keep.x = (keep.x * keep.mass + remove.x * remove.mass) / total;
+              keep.y = (keep.y * keep.mass + remove.y * remove.mass) / total;
+              keep.vx = (keep.vx + remove.vx) * 0.5;
+              keep.vy = (keep.vy + remove.vy) * 0.5;
+              keep.mass = total;
+              remove.alive = false;
+            }
+          }
+        }
       }
     }
 
-    function mergePlayerCells() {
-      const parts = playerCells();
-      for (let i = 0; i < parts.length; i++) {
-        for (let j = i + 1; j < parts.length; j++) {
-          const a = parts[i];
-          const b = parts[j];
-          if (!a.alive || !b.alive) continue;
-          if (a.mergeTimer > 0 || b.mergeTimer > 0) continue;
-          const d = dist(a.x, a.y, b.x, b.y);
-          if (d < (a.r + b.r) * 0.55) {
-            const keep = a.mass >= b.mass ? a : b;
-            const remove = keep === a ? b : a;
-            const total = keep.mass + remove.mass;
-            keep.x = (keep.x * keep.mass + remove.x * remove.mass) / total;
-            keep.y = (keep.y * keep.mass + remove.y * remove.mass) / total;
-            keep.vx = (keep.vx + remove.vx) * 0.5;
-            keep.vy = (keep.vy + remove.vy) * 0.5;
-            keep.mass = total;
-            remove.alive = false;
+    function findSafeSpawnPoint() {
+      for (let tries = 0; tries < 40; tries++) {
+        const x = rand(150, WORLD.w - 150);
+        const y = rand(150, WORLD.h - 150);
+        let danger = false;
+        for (const c of cells) {
+          if (!c.alive || c.ownerId === 'player') continue;
+          if (dist(x, y, c.x, c.y) < 700) {
+            danger = true;
+            break;
           }
+        }
+        if (!danger) return { x, y };
+      }
+      return { x: WORLD.w / 2, y: WORLD.h / 2 };
+    }
+
+    function respawnPlayerIfNeeded(dt) {
+      if (playerCells().length > 0) {
+        playerRespawnTimer = 0;
+        return;
+      }
+      playerRespawnTimer += dt;
+      if (playerRespawnTimer < 1.2) return;
+      const spot = findSafeSpawnPoint();
+      spawnPlayerAt(spot.x, spot.y);
+      playerInvincibleTimer = 2.0;
+      playerRespawnTimer = 0;
+    }
+
+    function respawnBotsIfNeeded() {
+      for (const [ownerId, brain] of botBrains.entries()) {
+        const alive = cells.some(c => c.alive && c.ownerId === ownerId);
+        if (!alive) {
+          const cell = createCell({
+            ownerId,
+            name: brain.name,
+            isPlayer: false,
+            mass: randomBotMass(),
+            skin: brain.skin,
+            x: rand(100, WORLD.w - 100),
+            y: rand(100, WORLD.h - 100)
+          });
+          cells.push(cell);
+          brain.personality = randomBotType();
+          brain.decisionTimer = rand(0.4, 1.1);
+          brain.goalType = 'wander';
+          brain.goalX = rand(0, WORLD.w);
+          brain.goalY = rand(0, WORLD.h);
+          brain.sprintEnergy = rand(30, 100);
+          brain.sprinting = false;
+          brain.sprintTimer = 0;
+          brain.splitCooldown = rand(2, 5);
         }
       }
     }
@@ -370,7 +902,6 @@
         camera.zoom = 1;
         return;
       }
-
       let sumX = 0;
       let sumY = 0;
       let maxR = 0;
@@ -381,7 +912,6 @@
         totalMass += c.mass;
         if (c.r > maxR) maxR = c.r;
       }
-
       camera.x = sumX / parts.length;
       camera.y = sumY / parts.length;
       camera.zoom = clamp(1.32 - maxR / 260 - (parts.length - 1) * 0.03 - totalMass / 14000, 0.22, 1.1);
@@ -398,7 +928,6 @@
       const gap = 100 * camera.zoom;
       const startX = ((-camera.x * camera.zoom + W / 2) % gap) - gap;
       const startY = ((-camera.y * camera.zoom + H / 2) % gap) - gap;
-
       ctx.save();
       ctx.strokeStyle = 'rgba(255,255,255,0.05)';
       ctx.lineWidth = 1;
@@ -424,6 +953,100 @@
       ctx.strokeStyle = 'rgba(255,255,255,0.22)';
       ctx.lineWidth = 4;
       ctx.strokeRect(tl.x, tl.y, br.x - tl.x, br.y - tl.y);
+      ctx.restore();
+    }
+
+    function drawSkinOverlay(c, p, r) {
+      const skin = c.skin || 'classic';
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+      ctx.clip();
+
+      if (skin === 'stripes') {
+        ctx.strokeStyle = 'rgba(255,255,255,0.26)';
+        ctx.lineWidth = Math.max(2, r * 0.16);
+        for (let i = -2; i <= 2; i++) {
+          ctx.beginPath();
+          ctx.moveTo(p.x - r, p.y - r * 0.9 + i * r * 0.55);
+          ctx.lineTo(p.x + r, p.y - r * 0.35 + i * r * 0.55);
+          ctx.stroke();
+        }
+      } else if (skin === 'checker') {
+        const s = Math.max(6, r * 0.22);
+        for (let yy = -r; yy < r; yy += s) {
+          for (let xx = -r; xx < r; xx += s) {
+            if (((Math.floor((xx + r) / s) + Math.floor((yy + r) / s)) % 2) === 0) {
+              ctx.fillStyle = 'rgba(255,255,255,0.18)';
+              ctx.fillRect(p.x + xx, p.y + yy, s, s);
+            }
+          }
+        }
+      } else if (skin === 'galaxy') {
+        ctx.fillStyle = 'rgba(20, 10, 60, 0.55)';
+        ctx.fillRect(p.x - r, p.y - r, r * 2, r * 2);
+        for (let i = 0; i < 10; i++) {
+          ctx.beginPath();
+          ctx.fillStyle = i % 2 === 0 ? 'rgba(255,255,255,0.9)' : 'rgba(120,200,255,0.85)';
+          ctx.arc(p.x + rand(-r * 0.6, r * 0.6), p.y + rand(-r * 0.6, r * 0.6), rand(1, Math.max(2, r * 0.06)), 0, Math.PI * 2);
+          ctx.fill();
+        }
+        ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+        ctx.lineWidth = Math.max(2, r * 0.05);
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, r * 0.72, 0, Math.PI * 2);
+        ctx.stroke();
+      } else if (skin === 'smiley') {
+        ctx.fillStyle = 'rgba(255,255,255,0.93)';
+        ctx.beginPath();
+        ctx.arc(p.x - r * 0.3, p.y - r * 0.18, Math.max(2, r * 0.08), 0, Math.PI * 2);
+        ctx.arc(p.x + r * 0.3, p.y - r * 0.18, Math.max(2, r * 0.08), 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+        ctx.lineWidth = Math.max(2, r * 0.06);
+        ctx.beginPath();
+        ctx.arc(p.x, p.y + r * 0.1, r * 0.35, 0.1 * Math.PI, 0.9 * Math.PI);
+        ctx.stroke();
+      } else if (skin === 'spikes') {
+        ctx.fillStyle = 'rgba(255,255,255,0.18)';
+        for (let i = 0; i < 10; i++) {
+          const a = (Math.PI * 2 * i) / 10;
+          const x1 = p.x + Math.cos(a) * r * 0.82;
+          const y1 = p.y + Math.sin(a) * r * 0.82;
+          const x2 = p.x + Math.cos(a + 0.12) * r * 0.42;
+          const y2 = p.y + Math.sin(a + 0.12) * r * 0.42;
+          const x3 = p.x + Math.cos(a - 0.12) * r * 0.42;
+          const y3 = p.y + Math.sin(a - 0.12) * r * 0.42;
+          ctx.beginPath();
+          ctx.moveTo(x1, y1);
+          ctx.lineTo(x2, y2);
+          ctx.lineTo(x3, y3);
+          ctx.closePath();
+          ctx.fill();
+        }
+      } else if (skin === 'neon') {
+        ctx.strokeStyle = 'rgba(110, 255, 240, 0.75)';
+        ctx.lineWidth = Math.max(2, r * 0.12);
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, r * 0.82, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.strokeStyle = 'rgba(255,255,255,0.32)';
+        ctx.lineWidth = Math.max(2, r * 0.06);
+        ctx.arc(p.x, p.y, r * 0.55, 0, Math.PI * 2);
+        ctx.stroke();
+      } else if (skin === 'camo') {
+        ctx.fillStyle = 'rgba(40, 120, 60, 0.35)';
+        ctx.fillRect(p.x - r, p.y - r, r * 2, r * 2);
+        const blobs = ['rgba(88, 156, 94, 0.45)', 'rgba(24, 88, 40, 0.45)', 'rgba(220, 225, 120, 0.18)'];
+        for (let i = 0; i < 8; i++) {
+          ctx.beginPath();
+          ctx.fillStyle = blobs[i % blobs.length];
+          ctx.ellipse(p.x + rand(-r * 0.55, r * 0.55), p.y + rand(-r * 0.55, r * 0.55), rand(r * 0.12, r * 0.28), rand(r * 0.08, r * 0.22), rand(0, Math.PI), 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
       ctx.restore();
     }
 
@@ -458,6 +1081,8 @@
         ctx.fillStyle = grad;
         ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
         ctx.fill();
+
+        drawSkinOverlay(c, p, r);
 
         ctx.lineWidth = Math.max(2, 4 * camera.zoom);
         ctx.strokeStyle = 'rgba(255,255,255,0.25)';
@@ -511,35 +1136,48 @@
     function updateHud() {
       const parts = playerCells().length;
       const mass = totalPlayerMass();
-      hudText.innerHTML = `Mass: <b>${Math.floor(mass)}</b><br>Player parts: <b>${parts}</b><br>Food: <b>${foods.length}</b><br>Bots: <b>${cells.filter(c => c.alive && !c.isPlayer).length}</b>`;
+      const botCountAlive = cells.filter(c => c.alive && c.ownerId !== 'player').length;
+      const respawnText = parts === 0 ? `<br>Respawn in: <b>${Math.max(0, 1.2 - playerRespawnTimer).toFixed(1)}s</b>` : '';
+      const invText = playerInvincibleTimer > 0 && parts > 0 ? `<br>Spawn shield: <b>${playerInvincibleTimer.toFixed(1)}s</b>` : '';
+      hudText.innerHTML = `Mass: <b>${Math.floor(mass)}</b><br>Player parts: <b>${parts}</b><br>Food: <b>${foods.length}</b><br>Bots: <b>${botCountAlive}</b>${respawnText}${invText}`;
       sprintFill.style.transform = `scaleX(${sprintEnergy / MAX_SPRINT})`;
       sprintLabel.textContent = sprintEnergy > 0.5 ? 'Sprint' : 'Recovering';
+      deathOverlay.classList.toggle('hidden', parts !== 0);
+      if (parts === 0) {
+        deathTimerText.textContent = `Respawning in ${Math.max(0, 1.2 - playerRespawnTimer).toFixed(1)}s`;
+      }
     }
 
-    function loop(now) {
-      const dt = Math.min(0.033, (now - lastTime) / 1000);
-      lastTime = now;
-
+    function gameStep(dt) {
+      if (playerInvincibleTimer > 0) playerInvincibleTimer = Math.max(0, playerInvincibleTimer - dt);
       updatePlayer(dt);
+      updateBotBrains(dt);
       updateBots(dt);
       applyPhysics(dt);
       eatFood();
       eatCells();
-      mergePlayerCells();
+      mergeSameOwnerCells();
+      respawnPlayerIfNeeded(dt);
+      respawnBotsIfNeeded();
       updateCamera();
       updateHud();
+    }
 
+    function loop(now) {
+      if (!gameStarted) return;
+      const dt = Math.min(0.033, (now - lastTime) / 1000);
+      lastTime = now;
+      gameStep(dt);
       ctx.clearRect(0, 0, W, H);
       drawGrid();
       drawBorder();
       drawFood();
       drawCells();
       drawLeaderboard();
-
       requestAnimationFrame(loop);
     }
 
-    requestAnimationFrame(loop);
+    updateHud();
   </script>
 </body>
 </html>
