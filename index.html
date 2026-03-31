@@ -31,6 +31,28 @@
       font-size: 14px;
       line-height: 1.4;
       backdrop-filter: blur(6px);
+      min-width: 190px;
+    }
+    .meter {
+      width: 100%;
+      height: 10px;
+      background: rgba(255,255,255,0.12);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+    .meter .fill {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, #67e8f9, #22c55e);
+      border-radius: 999px;
+      transform-origin: left center;
+      transform: scaleX(1);
+    }
+    .meterLabel {
+      margin-top: 4px;
+      font-size: 12px;
+      color: rgba(255,255,255,0.8);
     }
     .hint {
       position: fixed;
@@ -47,23 +69,34 @@
 </head>
 <body>
   <canvas id="game"></canvas>
-  <div class="hud" id="hud">Loading...</div>
-  <div class="hint">Move the mouse to steer. Eat food. Avoid bigger cells.</div>
+  <div class="hud" id="hud">
+    <div id="hudText">Loading...</div>
+    <div class="meter"><div class="fill" id="sprintFill"></div></div>
+    <div class="meterLabel" id="sprintLabel">Sprint</div>
+  </div>
+  <div class="hint">Mouse = steer. Space = split. Hold W = sprint.</div>
 
   <script>
     const canvas = document.getElementById('game');
     const ctx = canvas.getContext('2d');
-    const hud = document.getElementById('hud');
+    const hudText = document.getElementById('hudText');
+    const sprintFill = document.getElementById('sprintFill');
+    const sprintLabel = document.getElementById('sprintLabel');
 
     const WORLD = { w: 5000, h: 5000 };
     const FOOD_COUNT = 450;
     const BOT_COUNT = 12;
+    const MAX_PLAYER_PARTS = 16;
     const colors = ['#ff6b6b','#ffd93d','#6bcB77','#4d96ff','#b983ff','#ff8fab','#f7b267','#7bdff2'];
 
     let W = 0, H = 0, DPR = 1;
     let mouse = { x: 0, y: 0 };
+    let keys = { w: false };
+    let splitQueued = false;
     let camera = { x: WORLD.w / 2, y: WORLD.h / 2, zoom: 1 };
     let lastTime = performance.now();
+    let sprintEnergy = 100;
+    const MAX_SPRINT = 100;
 
     function resize() {
       DPR = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
@@ -83,6 +116,20 @@
       mouse.y = e.clientY;
     });
 
+    window.addEventListener('keydown', (e) => {
+      if (e.code === 'Space') {
+        e.preventDefault();
+        splitQueued = true;
+      }
+      if (e.code === 'KeyW') {
+        keys.w = true;
+      }
+    });
+
+    window.addEventListener('keyup', (e) => {
+      if (e.code === 'KeyW') keys.w = false;
+    });
+
     function rand(min, max) {
       return Math.random() * (max - min) + min;
     }
@@ -94,9 +141,6 @@
     }
     function massToRadius(m) {
       return Math.sqrt(m) * 4;
-    }
-    function radiusToMass(r) {
-      return (r / 4) * (r / 4);
     }
 
     const foods = [];
@@ -124,28 +168,101 @@
         r: massToRadius(mass),
         color: colors[(Math.random() * colors.length) | 0],
         alive: true,
-        target: { x: rand(0, WORLD.w), y: rand(0, WORLD.h) }
+        target: { x: rand(0, WORLD.w), y: rand(0, WORLD.h) },
+        splitCooldown: 0,
+        mergeTimer: 0
       };
     }
 
-    const player = spawnCell('You', true);
-    player.x = WORLD.w / 2;
-    player.y = WORLD.h / 2;
-    cells.push(player);
+    function playerCells() {
+      return cells.filter(c => c.alive && c.isPlayer);
+    }
 
+    function totalPlayerMass() {
+      return playerCells().reduce((sum, c) => sum + c.mass, 0);
+    }
+
+    function spawnPlayerAtCenter() {
+      const p = spawnCell('You', true);
+      p.x = WORLD.w / 2;
+      p.y = WORLD.h / 2;
+      p.mass = 120;
+      p.r = massToRadius(p.mass);
+      cells.push(p);
+      return p;
+    }
+
+    spawnPlayerAtCenter();
     for (let i = 0; i < BOT_COUNT; i++) cells.push(spawnCell('Bot ' + (i + 1)));
     for (let i = 0; i < FOOD_COUNT; i++) foods.push(spawnFood());
 
+    function splitCell(cell, dirX, dirY) {
+      if (cell.mass < 80 || cell.splitCooldown > 0) return false;
+      const newMass = cell.mass / 2;
+      cell.mass = newMass;
+
+      const len = Math.hypot(dirX, dirY) || 1;
+      const nx = dirX / len;
+      const ny = dirY / len;
+
+      const child = {
+        name: cell.isPlayer ? 'You' : cell.name,
+        isPlayer: cell.isPlayer,
+        x: clamp(cell.x + nx * cell.r * 1.15, 0, WORLD.w),
+        y: clamp(cell.y + ny * cell.r * 1.15, 0, WORLD.h),
+        vx: cell.vx + nx * 900,
+        vy: cell.vy + ny * 900,
+        mass: newMass,
+        r: massToRadius(newMass),
+        color: cell.color,
+        alive: true,
+        target: { x: rand(0, WORLD.w), y: rand(0, WORLD.h) },
+        splitCooldown: 1.0,
+        mergeTimer: 1.8
+      };
+
+      cell.vx -= nx * 90;
+      cell.vy -= ny * 90;
+      cell.splitCooldown = 1.0;
+      cell.mergeTimer = 1.8;
+      cells.push(child);
+      return true;
+    }
+
     function updatePlayer(dt) {
-      const dx = (mouse.x - W / 2);
-      const dy = (mouse.y - H / 2);
+      const dx = mouse.x - W / 2;
+      const dy = mouse.y - H / 2;
       const len = Math.hypot(dx, dy) || 1;
       const nx = dx / len;
       const ny = dy / len;
 
-      const speed = Math.max(70, 220 - player.r * 1.2);
-      player.vx += nx * speed * dt * 0.9;
-      player.vy += ny * speed * dt * 0.9;
+      const sprinting = keys.w && sprintEnergy > 0.5;
+      if (sprinting) {
+        sprintEnergy = clamp(sprintEnergy - 34 * dt, 0, MAX_SPRINT);
+      } else {
+        sprintEnergy = clamp(sprintEnergy + 18 * dt, 0, MAX_SPRINT);
+      }
+
+      const parts = playerCells();
+      for (const c of parts) {
+        const moveSpeed = Math.max(65, 215 - c.r * 1.15);
+        const accel = sprinting ? 520 : 260;
+        c.vx += nx * accel * dt;
+        c.vy += ny * accel * dt;
+        c.vx = clamp(c.vx, -moveSpeed * (sprinting ? 1.7 : 1.0), moveSpeed * (sprinting ? 1.7 : 1.0));
+        c.vy = clamp(c.vy, -moveSpeed * (sprinting ? 1.7 : 1.0), moveSpeed * (sprinting ? 1.7 : 1.0));
+      }
+
+      if (splitQueued) {
+        splitQueued = false;
+        const currentParts = playerCells();
+        if (currentParts.length < MAX_PLAYER_PARTS) {
+          for (const c of currentParts) {
+            if (playerCells().length >= MAX_PLAYER_PARTS) break;
+            splitCell(c, nx, ny);
+          }
+        }
+      }
     }
 
     function updateBots(dt) {
@@ -177,6 +294,9 @@
         c.y = clamp(c.y, c.r, WORLD.h - c.r);
         c.mass = Math.max(20, c.mass);
         c.r = massToRadius(c.mass);
+
+        c.splitCooldown = Math.max(0, c.splitCooldown - dt);
+        c.mergeTimer = Math.max(0, c.mergeTimer - dt);
       }
     }
 
@@ -198,6 +318,7 @@
       for (const a of aliveCells) {
         for (const b of aliveCells) {
           if (a === b || !a.alive || !b.alive) continue;
+          if (a.isPlayer && b.isPlayer) continue;
           if (a.mass <= b.mass * 1.12) continue;
           const d = dist(a.x, a.y, b.x, b.y);
           if (d < a.r - b.r * 0.2) {
@@ -211,12 +332,59 @@
         if (cells[i].alive) continue;
         if (!cells[i].isPlayer) cells[i] = spawnCell('Bot');
       }
+
+      if (playerCells().length === 0) {
+        spawnPlayerAtCenter();
+      }
+    }
+
+    function mergePlayerCells() {
+      const parts = playerCells();
+      for (let i = 0; i < parts.length; i++) {
+        for (let j = i + 1; j < parts.length; j++) {
+          const a = parts[i];
+          const b = parts[j];
+          if (!a.alive || !b.alive) continue;
+          if (a.mergeTimer > 0 || b.mergeTimer > 0) continue;
+          const d = dist(a.x, a.y, b.x, b.y);
+          if (d < (a.r + b.r) * 0.55) {
+            const keep = a.mass >= b.mass ? a : b;
+            const remove = keep === a ? b : a;
+            const total = keep.mass + remove.mass;
+            keep.x = (keep.x * keep.mass + remove.x * remove.mass) / total;
+            keep.y = (keep.y * keep.mass + remove.y * remove.mass) / total;
+            keep.vx = (keep.vx + remove.vx) * 0.5;
+            keep.vy = (keep.vy + remove.vy) * 0.5;
+            keep.mass = total;
+            remove.alive = false;
+          }
+        }
+      }
     }
 
     function updateCamera() {
-      camera.x = player.x;
-      camera.y = player.y;
-      camera.zoom = clamp(1.25 - player.r / 250, 0.25, 1.1);
+      const parts = playerCells();
+      if (parts.length === 0) {
+        camera.x = WORLD.w / 2;
+        camera.y = WORLD.h / 2;
+        camera.zoom = 1;
+        return;
+      }
+
+      let sumX = 0;
+      let sumY = 0;
+      let maxR = 0;
+      let totalMass = 0;
+      for (const c of parts) {
+        sumX += c.x;
+        sumY += c.y;
+        totalMass += c.mass;
+        if (c.r > maxR) maxR = c.r;
+      }
+
+      camera.x = sumX / parts.length;
+      camera.y = sumY / parts.length;
+      camera.zoom = clamp(1.32 - maxR / 260 - (parts.length - 1) * 0.03 - totalMass / 14000, 0.22, 1.1);
     }
 
     function worldToScreen(x, y) {
@@ -277,13 +445,11 @@
         const r = c.r * camera.zoom;
         if (p.x < -r - 20 || p.x > W + r + 20 || p.y < -r - 20 || p.y > H + r + 20) continue;
 
-        // shadow
         ctx.beginPath();
         ctx.fillStyle = 'rgba(0,0,0,0.25)';
         ctx.arc(p.x + 5, p.y + 8, r, 0, Math.PI * 2);
         ctx.fill();
 
-        // body
         const grad = ctx.createRadialGradient(p.x - r * 0.3, p.y - r * 0.3, r * 0.2, p.x, p.y, r);
         grad.addColorStop(0, '#ffffff');
         grad.addColorStop(0.15, c.color);
@@ -297,14 +463,12 @@
         ctx.strokeStyle = 'rgba(255,255,255,0.25)';
         ctx.stroke();
 
-        // name
         ctx.fillStyle = '#fff';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.font = `${Math.max(12, r * 0.26)}px Arial`;
         ctx.fillText(c.name, p.x, p.y - r * 0.15);
 
-        // mass text
         ctx.font = `${Math.max(10, r * 0.18)}px Arial`;
         ctx.fillStyle = 'rgba(255,255,255,0.9)';
         ctx.fillText(Math.floor(c.mass), p.x, p.y + r * 0.18);
@@ -345,7 +509,11 @@
     }
 
     function updateHud() {
-      hud.innerHTML = `Mass: <b>${Math.floor(player.mass)}</b><br>Radius: <b>${Math.floor(player.r)}</b><br>Food: <b>${foods.length}</b><br>Bots: <b>${cells.filter(c => c.alive && !c.isPlayer).length}</b>`;
+      const parts = playerCells().length;
+      const mass = totalPlayerMass();
+      hudText.innerHTML = `Mass: <b>${Math.floor(mass)}</b><br>Player parts: <b>${parts}</b><br>Food: <b>${foods.length}</b><br>Bots: <b>${cells.filter(c => c.alive && !c.isPlayer).length}</b>`;
+      sprintFill.style.transform = `scaleX(${sprintEnergy / MAX_SPRINT})`;
+      sprintLabel.textContent = sprintEnergy > 0.5 ? 'Sprint' : 'Recovering';
     }
 
     function loop(now) {
@@ -357,6 +525,7 @@
       applyPhysics(dt);
       eatFood();
       eatCells();
+      mergePlayerCells();
       updateCamera();
       updateHud();
 
