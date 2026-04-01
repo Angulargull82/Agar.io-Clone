@@ -269,16 +269,16 @@
     const skinGrid = document.getElementById('skinGrid');
     const playerNameInput = document.getElementById('playerName');
 
-    const WORLD = { w: 5000, h: 5000 };
+    const WORLD = { w: 15000, h: 15000 };
     const FOOD_COUNT = 850;
-    const BOT_COUNT = 70;
+    const BOT_COUNT = 90;
     const MAX_PLAYER_PARTS = 16;
     const SKINS = ['classic', 'stripes', 'checker', 'galaxy', 'smiley', 'spikes', 'neon', 'camo'];
     const colors = ['#ff6b6b', '#ffd93d', '#6bcB77', '#4d96ff', '#b983ff', '#ff8fab', '#f7b267', '#7bdff2'];
     const botNames = [
       'Alex', 'Mira', 'Noah', 'Lina', 'Olle', 'Saga', 'Elias', 'Nora', 'Vera', 'Leo',
       'Elsa', 'Max', 'Milo', 'Alma', 'Felix', 'Nova', 'William', 'Ida', 'Ella', 'Arvid',
-      'Selma', 'Hugo', 'Alice', 'Nils', 'Tova', 'Sam', 'Iris', 'Adam', 'Liam', 'Olivia'
+      'Selma', 'Hugo', 'Alice', 'Nils', 'Tova', 'Sam', 'Iris', 'Adam', 'Liam', 'Olivia', 'Strid', 'Mahdi', 'Westman', 'Artem Bokin', 'Clav'
     ];
 
     let W = 0, H = 0, DPR = 1;
@@ -294,6 +294,10 @@
     let playerDisplayName = 'You';
     let playerRespawnTimer = 0;
     let playerInvincibleTimer = 0;
+    let bestTime = localStorage.getItem('bestTime') || null;
+    let countdown = 0;
+    let gameRunning = false;
+
 
     const foods = [];
     const cells = [];
@@ -417,12 +421,23 @@
     startBtn.addEventListener('click', () => {
       playerSkin = skinSelect.value;
       playerDisplayName = (playerNameInput.value || 'You').trim().slice(0, 18) || 'You';
-      menu.classList.add('hidden');
-      gameStarted = true;
-      resetGame();
-      requestAnimationFrame(loop);
-    });
 
+      timeModeFinished = false;
+
+  if (gameMode === 'time') {
+    countdown = 3;
+    gameRunning = false;
+    timeModeStart = 0;
+  } else {
+    gameRunning = true;
+  }
+
+  menu.classList.add('hidden');
+  gameStarted = true;
+  resetGame();
+  requestAnimationFrame(loop);
+});
+    
     window.addEventListener('mousemove', (e) => {
       mouse.x = e.clientX;
       mouse.y = e.clientY;
@@ -1145,10 +1160,61 @@
       deathOverlay.classList.toggle('hidden', parts !== 0);
       if (parts === 0) {
         deathTimerText.textContent = `Respawning in ${Math.max(0, 1.2 - playerRespawnTimer).toFixed(1)}s`;
+      ctx.save();
+ctx.fillStyle = 'white';
+ctx.textAlign = 'center';
+
+if (gameMode === 'time') {
+
+  if (!gameRunning) {
+    ctx.font = 'bold 60px Arial';
+    ctx.fillText(Math.ceil(countdown), W / 2, H / 2);
+  }
+
+  const mass = totalPlayerMass();
+
+  if (!timeModeFinished && mass >= timeModeTarget) {
+    timeModeFinished = true;
+    const time = ((performance.now() - timeModeStart) / 1000);
+
+    if (!bestTime || time < bestTime) {
+      bestTime = time;
+      localStorage.setItem('bestTime', time);
+    }
+  }
+
+  if (gameRunning && !timeModeFinished) {
+    const t = ((performance.now() - timeModeStart) / 1000).toFixed(1);
+    ctx.font = 'bold 28px Arial';
+    ctx.fillText(t + "s", W / 2, 40);
+  }
+
+  if (timeModeFinished) {
+    ctx.font = 'bold 40px Arial';
+    ctx.fillText("Finished!", W / 2, H / 2 - 20);
+
+    ctx.font = '20px Arial';
+    ctx.fillText(
+      "Time: " + ((performance.now() - timeModeStart)/1000).toFixed(2) + "s",
+      W / 2, H / 2 + 20
+    );
+
+    if (bestTime) {
+      ctx.fillText(
+        "Best: " + Number(bestTime).toFixed(2) + "s",
+        W / 2, H / 2 + 50
+      );
+    }
+  }
+}
+
+ctx.restore();
       }
     }
 
     function gameStep(dt) {
+      if (!gameRunning) return;
+      
       if (playerInvincibleTimer > 0) playerInvincibleTimer = Math.max(0, playerInvincibleTimer - dt);
       updatePlayer(dt);
       updateBotBrains(dt);
@@ -1164,18 +1230,23 @@
     }
 
     function loop(now) {
-      if (!gameStarted) return;
-      const dt = Math.min(0.033, (now - lastTime) / 1000);
-      lastTime = now;
-      gameStep(dt);
-      ctx.clearRect(0, 0, W, H);
-      drawGrid();
-      drawBorder();
-      drawFood();
-      drawCells();
-      drawLeaderboard();
-      requestAnimationFrame(loop);
+       if (countdown <= 0) {
+      gameRunning = true;
+      timeModeStart = performance.now();
     }
+  }
+
+  gameStep(dt);
+
+  ctx.clearRect(0, 0, W, H);
+  drawGrid();
+  drawBorder();
+  drawFood();
+  drawCells();
+  drawLeaderboard();
+
+  requestAnimationFrame(loop);
+}
 
     updateHud();
   </script>
